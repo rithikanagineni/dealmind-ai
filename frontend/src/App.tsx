@@ -14,13 +14,11 @@ function App() {
   const [currentPage, setCurrentPage] = useState<Page>('dashboard');
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
   const [backendStatus, setBackendStatus] = useState<'checking' | 'ok' | 'error'>('checking');
-  const [healthInfo, setHealthInfo] = useState<{ hindsight_configured: boolean; groq_configured: boolean } | null>(null);
 
   useEffect(() => {
     api.health()
-      .then((h) => {
+      .then(() => {
         setBackendStatus('ok');
-        setHealthInfo(h);
       })
       .catch(() => setBackendStatus('error'));
   }, []);
@@ -70,22 +68,10 @@ function App() {
     <div className="flex h-screen bg-slate-50 overflow-hidden">
       <Sidebar currentPage={currentPage} onNavigate={handleNavigate} />
       <div className="flex flex-col flex-1 overflow-hidden">
-        {/* Backend status bar */}
-        {backendStatus !== 'ok' && (
-          <div className={`px-4 py-2 text-sm text-center font-medium ${
-            backendStatus === 'error'
-              ? 'bg-red-50 text-red-700 border-b border-red-200'
-              : 'bg-yellow-50 text-yellow-700 border-b border-yellow-200'
-          }`}>
-            {backendStatus === 'error'
-              ? '⚠️ Backend not reachable — make sure the DealMind backend is running on port 8000'
-              : '⏳ Connecting to DealMind backend...'}
-          </div>
-        )}
-        {healthInfo && (!healthInfo.hindsight_configured || !healthInfo.groq_configured) && (
-          <div className="px-4 py-2 text-sm text-center font-medium bg-amber-50 text-amber-700 border-b border-amber-200">
-            {!healthInfo.hindsight_configured && '⚠️ HINDSIGHT_API_KEY not set — memory features disabled. '}
-            {!healthInfo.groq_configured && '⚠️ GROQ_API_KEY not set — AI features disabled.'}
+        {/* Backend status bar (only shown if backend is disconnected/unreachable) */}
+        {backendStatus === 'error' && (
+          <div className="px-4 py-2 text-sm text-center font-medium bg-red-50 text-red-700 border-b border-red-200">
+            ⚠️ Backend not reachable — make sure the DealMind backend is running on port 8000
           </div>
         )}
         <main className="flex-1 overflow-y-auto">
